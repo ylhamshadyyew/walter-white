@@ -106,27 +106,16 @@ function updateAuthUI(username = null) {
         authButton.style.display = 'none';
         userInfo.style.display = 'flex';
         usernameSpan.textContent = username;
-        commentForm.style.display = 'flex'; // Show comment form for logged in users
+        commentForm.style.display = 'flex';
     } else {
         authButton.style.display = 'block';
         userInfo.style.display = 'none';
         usernameSpan.textContent = '';
-        commentForm.style.display = 'none'; // Hide comment form for logged out users
-    }
-}
-
-// Check if user is logged in on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-        updateAuthUI(currentUser);
-    } else {
-        // Hide comment form if user is not logged in
-        const commentForm = document.querySelector('.comment-form');
         commentForm.style.display = 'none';
     }
+    // Always display comments, regardless of login status
     displayComments();
-});
+}
 
 // Function to add a new comment
 function addComment() {
@@ -146,8 +135,11 @@ function addComment() {
     }
     
     // Check for verified users
-    const isVerified = currentUser.toLowerCase() === 'snike' || currentUser.toLowerCase() === 'rakanoot';
-    const isGoldVerified = currentUser.toLowerCase() === 'mak_sim';
+    const verifiedUsers = ['snike', 'rakanoot', 'snike_yt'];
+    const goldVerifiedUsers = ['mak_sim'];
+    
+    const isVerified = verifiedUsers.includes(currentUser.toLowerCase());
+    const isGoldVerified = goldVerifiedUsers.includes(currentUser.toLowerCase());
     
     const comment = {
         name: currentUser,
@@ -177,8 +169,8 @@ function displayComments() {
         let verifiedBadge = '';
         if (comment.goldVerified) {
             verifiedBadge = '<span class="verified-badge gold"><i class="fas fa-check-circle"></i></span>';
-        } else if (comment.verified) {
-            verifiedBadge = '<span class="verified-badge"><i class="fas fa-check-circle"></i></span>';
+        } else if (comment.verified || comment.name.toLowerCase() === 'snike_yt') {
+            verifiedBadge = '<span class="verified-badge" style="color: #2ecc71;"><i class="fas fa-check-circle"></i></span>';
         }
         
         commentElement.innerHTML = `
@@ -231,4 +223,14 @@ document.querySelectorAll('section').forEach(section => {
     section.style.transform = 'translateY(20px)';
     section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
     observer.observe(section);
+});
+
+// Initialize the UI on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+        updateAuthUI(currentUser);
+    }
+    // Always display comments, regardless of login status
+    displayComments();
 });
