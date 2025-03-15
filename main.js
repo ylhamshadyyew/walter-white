@@ -87,6 +87,7 @@ function login() {
         updateAuthUI(username);
         modal.style.display = 'none';
         alert('Добро пожаловать, ' + username + '!');
+        displayComments(); // Обновляем комментарии при входе
     } else {
         alert('Неверное имя пользователя или пароль');
     }
@@ -96,12 +97,11 @@ function login() {
 function logout() {
     localStorage.removeItem('currentUser');
     updateAuthUI();
+    displayComments(); // Обновляем комментарии при выходе
 }
 
 // Update UI based on auth state
 function updateAuthUI(username = null) {
-    const commentForm = document.querySelector('.comment-form');
-    
     if (username) {
         authButton.style.display = 'none';
         userInfo.style.display = 'flex';
@@ -113,8 +113,6 @@ function updateAuthUI(username = null) {
         usernameSpan.textContent = '';
         commentForm.style.display = 'none';
     }
-    // Always display comments, regardless of login status
-    displayComments();
 }
 
 // Function to add a new comment
@@ -134,27 +132,17 @@ function addComment() {
         return;
     }
     
-    // Check for verified users
-    const verifiedUsers = ['snike', 'rakanoot', 'snike_yt'];
-    const goldVerifiedUsers = ['mak_sim'];
-    
-    const isVerified = verifiedUsers.includes(currentUser.toLowerCase());
-    const isGoldVerified = goldVerifiedUsers.includes(currentUser.toLowerCase());
-    
     const comment = {
         name: currentUser,
         text: text,
-        verified: isVerified,
-        goldVerified: isGoldVerified,
         date: new Date().toLocaleString()
     };
     
     comments.push(comment);
     localStorage.setItem('comments', JSON.stringify(comments));
-    displayComments();
     
-    // Clear input
     textInput.value = '';
+    displayComments();
 }
 
 // Function to display comments
@@ -162,14 +150,14 @@ function displayComments() {
     const commentsContainer = document.getElementById('commentsList');
     commentsContainer.innerHTML = '';
     
+    // Показываем все комментарии
     comments.forEach(comment => {
         const commentElement = document.createElement('div');
         commentElement.className = 'comment';
         
+        // Добавляем зеленую галочку для snike_yt
         let verifiedBadge = '';
-        if (comment.goldVerified) {
-            verifiedBadge = '<span class="verified-badge gold"><i class="fas fa-check-circle"></i></span>';
-        } else if (comment.verified || comment.name.toLowerCase() === 'snike_yt') {
+        if (comment.name.toLowerCase() === 'snike_yt') {
             verifiedBadge = '<span class="verified-badge" style="color: #2ecc71;"><i class="fas fa-check-circle"></i></span>';
         }
         
@@ -225,12 +213,11 @@ document.querySelectorAll('section').forEach(section => {
     observer.observe(section);
 });
 
-// Initialize the UI on page load
+// Initialize the UI and display comments on page load
 document.addEventListener('DOMContentLoaded', function() {
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
         updateAuthUI(currentUser);
     }
-    // Always display comments, regardless of login status
-    displayComments();
+    displayComments(); // Показываем все комментарии при загрузке страницы
 });
